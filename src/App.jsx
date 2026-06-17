@@ -55,7 +55,7 @@ export default function App() {
           <Route path="/onboarding" element={<Onboarding onComplete={setProfile} />} />
           <Route path="/contacts" element={<ContactList />} />
           <Route path="/chat/:contactId" element={<Chat profile={profile} />} />
-          <Route path="/vocab" element={<Vocab />} />
+          <Route path="/vocab" element={<Vocab profile={profile} />} />
           <Route path="/grammar" element={<Grammar profile={profile} />} />
           <Route path="*" element={<Navigate to="/contacts" replace />} />
         </Routes>

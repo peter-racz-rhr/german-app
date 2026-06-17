@@ -241,6 +241,28 @@ Return ONLY a JSON object:
   } catch (err) { res.status(500).json({ error: String(err) }); }
 });
 
+// ── Dictionary lookup ─────────────────────────────────────────────────────────
+
+app.post("/api/lookup", async (req, res) => {
+  try {
+    const { word, level } = req.body;
+    const system = `You are a German-Hungarian dictionary for a Hungarian learner at CEFR ${level || "A2"}. Given a German word, return detailed info entirely in Hungarian.
+Return ONLY JSON:
+{
+  "translation": "<magyar fordítás, vesszővel elválasztva ha több jelentés van>",
+  "article": "<der / die / das — ha főnév, egyébként '—'>",
+  "plural": "<többes szám nominatív, pl. 'die Hunde' — ha főnév, egyébként '—'>",
+  "forms": "<legfontosabb alakok: igénél jelen idő E/1-3, főnévnél akk+dat, melléknévnél fokozás — max 1 sor>",
+  "example": "<egy rövid, természetes német példamondat>",
+  "exampleHu": "<a példamondat magyar fordítása>"
+}`;
+    res.json(await callJson({ system, messages: [{ role: "user", content: word }], maxTokens: 350 }));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: String(err) });
+  }
+});
+
 // ── Daily story ───────────────────────────────────────────────────────────────
 
 app.get("/api/story/:contactId", async (req, res) => {
