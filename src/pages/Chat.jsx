@@ -42,6 +42,16 @@ export default function Chat({ profile }) {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [busy]);
 
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => {
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+    };
+    vv.addEventListener("resize", onResize);
+    return () => vv.removeEventListener("resize", onResize);
+  }, []);
+
   async function handleSend() {
     const text = input.trim();
     if (!text || busy) return;
