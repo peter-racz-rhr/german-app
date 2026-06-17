@@ -23,31 +23,32 @@ export default function Chat({ profile }) {
   const [savedWord, setSavedWord] = useState(null);
   const scrollRef = useRef(null);
   const textareaRef = useRef(null);
-  const initialScrollDone = useRef(false);
+  const msgCountRef = useRef(0);
 
   useEffect(() => {
-    initialScrollDone.current = false;
+    msgCountRef.current = 0;
     const cacheKey = `msgs:${contact.id}`;
-    // 1. show cached instantly, scroll to bottom immediately
+    // 1. show cached instantly + scroll to bottom (no animation)
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
         if (parsed?.length) {
           setMessages(parsed);
-          requestAnimationFrame(() => {
-            scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
-            initialScrollDone.current = true;
-          });
+          msgCountRef.current = parsed.length;
+          requestAnimationFrame(() =>
+            scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight })
+          );
         }
       } catch {}
     }
-    // 2. fetch fresh silently — no second scroll
+    // 2. fetch fresh silently — update cache but DO NOT scroll
     setLoaded(false);
     fetchMessages(contact.id)
       .then((saved) => {
         if (saved?.length) {
           setMessages(saved);
+          msgCountRef.current = saved.length;
           localStorage.setItem(cacheKey, JSON.stringify(saved));
         }
         setLoaded(true);
@@ -55,17 +56,15 @@ export default function Chat({ profile }) {
       .catch(() => setLoaded(true));
   }, [contact.id]);
 
+  // only scroll when a NEW message is added (count increases)
   useEffect(() => {
     if (!loaded) return;
     const cacheKey = `msgs:${contact.id}`;
     localStorage.setItem(cacheKey, JSON.stringify(messages));
     persistMessages(contact.id, messages).catch(() => {});
-    // only smooth-scroll for new messages, not on initial load
-    if (initialScrollDone.current) {
+    if (messages.length > msgCountRef.current) {
+      msgCountRef.current = messages.length;
       scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-    } else {
-      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
-      initialScrollDone.current = true;
     }
   }, [messages, loaded]);
 
