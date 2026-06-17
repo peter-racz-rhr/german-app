@@ -17,6 +17,7 @@ export default function Chat({ profile }) {
   const greeting = { from: "them", text: contact.greeting };
   const [messages, setMessages] = useState([greeting]);
   const [loaded, setLoaded] = useState(false);
+  const [visible, setVisible] = useState(false);
   const [input, setInput] = useState(location.state?.prefill || "");
   const [busy, setBusy] = useState(false);
   const [popover, setPopover] = useState(null);
@@ -27,8 +28,8 @@ export default function Chat({ profile }) {
 
   useEffect(() => {
     msgCountRef.current = 0;
+    setVisible(false);
     const cacheKey = `msgs:${contact.id}`;
-    // 1. show cached instantly + scroll to bottom (no animation)
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       try {
@@ -36,13 +37,10 @@ export default function Chat({ profile }) {
         if (parsed?.length) {
           setMessages(parsed);
           msgCountRef.current = parsed.length;
-          requestAnimationFrame(() =>
-            scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight })
-          );
         }
       } catch {}
     }
-    // 2. fetch fresh silently — update cache but DO NOT scroll
+    // fetch fresh silently
     setLoaded(false);
     fetchMessages(contact.id)
       .then((saved) => {
@@ -56,9 +54,19 @@ export default function Chat({ profile }) {
       .catch(() => setLoaded(true));
   }, [contact.id]);
 
-  // only scroll when a NEW message is added (count increases)
+  // after messages render: snap to bottom instantly, then reveal
   useEffect(() => {
-    if (!loaded) return;
+    if (visible) return;
+    if (messages.length === 0) return;
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+      setVisible(true);
+    });
+  }, [messages]);
+
+  // new message added while chatting: smooth scroll
+  useEffect(() => {
+    if (!loaded || !visible) return;
     const cacheKey = `msgs:${contact.id}`;
     localStorage.setItem(cacheKey, JSON.stringify(messages));
     persistMessages(contact.id, messages).catch(() => {});
@@ -173,7 +181,7 @@ export default function Chat({ profile }) {
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-2 flex flex-col gap-1">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-2 flex flex-col gap-1 bg-white transition-opacity duration-150" style={{ opacity: visible ? 1 : 0 }}>
         {/* Contact info at top of thread */}
         <div className="flex flex-col items-center py-4 gap-2">
           <Avatar contact={contact} size={70} />
