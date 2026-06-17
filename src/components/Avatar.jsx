@@ -1,5 +1,21 @@
-export default function Avatar({ contact, size = 50, showEmoji = true }) {
+import { useState } from "react";
+
+export default function Avatar({ contact, size = 50 }) {
+  const [imgError, setImgError] = useState(false);
   const [g1, g2] = contact.gradient || [contact.color, contact.color];
+
+  if (contact.photo && !imgError) {
+    return (
+      <img
+        src={contact.photo}
+        alt={contact.name}
+        onError={() => setImgError(true)}
+        className="rounded-full object-cover flex-shrink-0"
+        style={{ width: size, height: size }}
+      />
+    );
+  }
+
   return (
     <div
       className="rounded-full flex items-center justify-center flex-shrink-0 select-none"
@@ -7,14 +23,11 @@ export default function Avatar({ contact, size = 50, showEmoji = true }) {
         width: size,
         height: size,
         background: `linear-gradient(135deg, ${g1}, ${g2})`,
-        fontSize: size * 0.42,
       }}
     >
-      {showEmoji ? contact.emoji : (
-        <span className="text-white font-bold" style={{ fontSize: size * 0.34 }}>
-          {contact.initials}
-        </span>
-      )}
+      <span className="text-white font-bold" style={{ fontSize: size * 0.34 }}>
+        {contact.initials}
+      </span>
     </div>
   );
 }
