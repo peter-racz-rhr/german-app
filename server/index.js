@@ -246,15 +246,22 @@ Return ONLY a JSON object:
 app.post("/api/lookup", async (req, res) => {
   try {
     const { word, level } = req.body;
-    const system = `You are a German-Hungarian dictionary for a Hungarian learner at CEFR ${level || "A2"}. Given a German word, return detailed info entirely in Hungarian.
+    const system = `You are a German-Hungarian / Hungarian-German dictionary for a Hungarian learner at CEFR ${level || "A2"}.
+
+Detect the language of the input word:
+- If the word is HUNGARIAN: translate it to German, find the correct German word(s).
+- If the word is GERMAN: translate it to Hungarian.
+
 Return ONLY JSON:
 {
-  "translation": "<magyar fordítás, vesszővel elválasztva ha több jelentés van>",
-  "article": "<der / die / das — ha főnév, egyébként '—'>",
-  "plural": "<többes szám nominatív, pl. 'die Hunde' — ha főnév, egyébként '—'>",
-  "forms": "<legfontosabb alakok: igénél jelen idő E/1-3, főnévnél akk+dat, melléknévnél fokozás — max 1 sor>",
-  "example": "<egy rövid, természetes német példamondat>",
-  "exampleHu": "<a példamondat magyar fordítása>"
+  "direction": "hu→de OR de→hu",
+  "word": "<the input word>",
+  "translation": "<if hu→de: the German word(s) with article if noun, e.g. 'der Hund' / if de→hu: Hungarian translation>",
+  "article": "<der / die / das — if German noun, otherwise '—'>",
+  "plural": "<German plural nominative e.g. 'die Hunde' — if noun, otherwise '—'>",
+  "forms": "<key forms in 1 line: for verbs present tense ich/du/er, for nouns akk+dat>",
+  "example": "<short natural German example sentence>",
+  "exampleHu": "<Hungarian translation of the example>"
 }`;
     res.json(await callJson({ system, messages: [{ role: "user", content: word }], maxTokens: 350 }));
   } catch (err) {
