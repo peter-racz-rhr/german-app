@@ -25,11 +25,29 @@ export default function Chat({ profile }) {
   const textareaRef = useRef(null);
 
   useEffect(() => {
-    setMessages([greeting]);
+    // 1. show cached instantly
+    const cacheKey = `msgs:${contact.id}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (parsed?.length) {
+          setMessages(parsed);
+          // scroll immediately after paint
+          requestAnimationFrame(() =>
+            scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight })
+          );
+        }
+      } catch {}
+    }
+    // 2. fetch fresh from server in background
     setLoaded(false);
     fetchMessages(contact.id)
       .then((saved) => {
-        if (saved?.length) setMessages(saved);
+        if (saved?.length) {
+          setMessages(saved);
+          localStorage.setItem(cacheKey, JSON.stringify(saved));
+        }
         setLoaded(true);
       })
       .catch(() => setLoaded(true));
@@ -37,6 +55,8 @@ export default function Chat({ profile }) {
 
   useEffect(() => {
     if (!loaded) return;
+    const cacheKey = `msgs:${contact.id}`;
+    localStorage.setItem(cacheKey, JSON.stringify(messages));
     persistMessages(contact.id, messages).catch(() => {});
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loaded]);
