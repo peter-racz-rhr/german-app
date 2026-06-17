@@ -6,50 +6,36 @@ async function post(path, body) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`API ${path} failed: ${res.status} ${text}`);
-  }
+  if (!res.ok) throw new Error(`API ${path} failed: ${res.status}`);
   return res.json();
 }
 
 async function get(path) {
   const res = await fetch(`${BASE}/api${path}`);
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`API ${path} failed: ${res.status} ${text}`);
-  }
+  if (!res.ok) throw new Error(`API ${path} failed: ${res.status}`);
   return res.json();
 }
 
-export function assessAnswer({ question, answer, history }) {
-  return post("/assess", { question, answer, history });
+async function del(path) {
+  const res = await fetch(`${BASE}/api${path}`, { method: "DELETE" });
+  if (!res.ok) throw new Error(`API ${path} failed: ${res.status}`);
+  return res.json();
 }
 
-export function sendChatMessage({ messages, level }) {
-  return post("/chat", { messages, level });
-}
+export const assessAnswer = ({ history }) => post("/assess", { history });
+export const sendChatMessage = ({ messages, level, contactId }) =>
+  post(`/chat/${contactId || "anna"}`, { messages, level });
+export const defineWord = ({ word, sentence, level }) => post("/define", { word, sentence, level });
 
-export function defineWord({ word, sentence, level }) {
-  return post("/define", { word, sentence, level });
-}
+export const fetchProfile = () => get("/profile");
+export const persistProfile = (profile) => post("/profile", profile);
+export const resetProfile = () => fetch(`${BASE}/api/profile`, { method: "DELETE" });
 
-export function fetchProfile() {
-  return get("/profile");
-}
+export const fetchMessages = (contactId) => get(`/messages/${contactId}`);
+export const persistMessages = (contactId, messages) => post(`/messages/${contactId}`, messages);
 
-export function persistProfile(profile) {
-  return post("/profile", profile);
-}
+export const fetchVocab = () => get("/vocab");
+export const saveVocabWord = (entry) => post("/vocab", entry);
+export const deleteVocabWord = (word) => del(`/vocab/${encodeURIComponent(word)}`);
 
-export function fetchMessages() {
-  return get("/messages");
-}
-
-export function persistMessages(messages) {
-  return post("/messages", messages);
-}
-
-export function resetProfile() {
-  return fetch(`${BASE}/api/profile`, { method: "DELETE" });
-}
+export const fetchGrammarLesson = ({ topic, level }) => post("/grammar/lesson", { topic, level });
