@@ -8,7 +8,7 @@ export default function ContactList() {
   return (
     <div className="flex flex-col h-full">
       <div className="px-4 pt-[max(14px,env(safe-area-inset-top))] pb-3 border-b border-[var(--line)]">
-        <p className="text-[28px] font-bold tracking-tight">Nachrichten</p>
+        <p className="text-[28px] font-bold tracking-tight">Üzenetek</p>
       </div>
 
       <div className="flex-1 overflow-y-auto">

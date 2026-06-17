@@ -2,8 +2,8 @@ import { NavLink, useLocation } from "react-router-dom";
 
 const TABS = [
   { to: "/contacts", label: "Chat", icon: ChatIcon, match: ["/contacts", "/chat"] },
-  { to: "/vocab", label: "Vocab", icon: VocabIcon, match: ["/vocab"] },
-  { to: "/grammar", label: "Grammatik", icon: GrammarIcon, match: ["/grammar"] },
+  { to: "/vocab", label: "Szótár", icon: VocabIcon, match: ["/vocab"] },
+  { to: "/grammar", label: "Nyelvtan", icon: GrammarIcon, match: ["/grammar"] },
 ];
 
 export default function BottomNav() {

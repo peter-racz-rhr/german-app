@@ -91,13 +91,13 @@ async function callJson({ system, messages, maxTokens = 600 }) {
 
 // ── Placement test ────────────────────────────────────────────────────────────
 
-const ASSESS_SYSTEM = `You are a friendly German placement-test examiner. Figure out the learner's CEFR level (A1–C2) through a short adaptive conversation.
+const ASSESS_SYSTEM = `You are a friendly German placement-test examiner. The learner is Hungarian. Figure out their CEFR level (A1–C2) through a short adaptive conversation.
 Rules:
-- One question per turn. Mix German and English based on their level.
+- One question per turn. Use German questions (with Hungarian explanation in parentheses for beginners). If they struggle, switch to simpler German or add more Hungarian context. If they're advanced, use pure German.
 - Cover: greetings, vocab, verb conjugation, tenses, subordinate clauses, opinions.
 - After at most 6 learner answers, stop and produce a final verdict.
 - Respond ONLY with a JSON object, no markdown:
-  {"reply": "<question or friendly closing>", "done": false, "level": ""}`;
+  {"reply": "<question or friendly closing — use Hungarian for meta-communication, German for the actual test>", "done": false, "level": ""}`;
 
 app.post("/api/assess", async (req, res) => {
   try {
@@ -112,19 +112,19 @@ app.post("/api/assess", async (req, res) => {
 const PERSONAS = {
   anna: {
     name: "Anna",
-    system: (level) => `You are Anna, 22, a warm and funny German friend texting casually at CEFR level ${level || "A2"}. You talk about everyday life — plans, food, weekend, hobbies — like a real friend, not a teacher. Keep replies short and chatty (1-3 sentences), end with a question. If the learner makes a grammar/spelling mistake, briefly note it kindly. Respond ONLY with JSON: {"reply": "<German text>", "correction": "<short fix note or empty string>"}`,
+    system: (level) => `You are Anna, 22, a warm and funny German friend texting casually with a Hungarian learner at CEFR level ${level || "A2"}. Talk about everyday life like a real friend. Keep replies short (1-3 sentences), end with a question. If the learner makes a grammar/spelling mistake, briefly note it in HUNGARIAN. Respond ONLY with JSON: {"reply": "<German text>", "correction": "<rövid magyar nyelvű javítás, pl. 'A „gehe" helyett „gehen" a helyes alak.' — vagy üres string ha nincs hiba>"}`,
   },
   prof: {
     name: "Prof. Weber",
-    system: (level) => `You are Professor Weber, a formal and precise German professor helping a learner at CEFR level ${level || "A2"}. You are encouraging but strict about grammar. You discuss culture, history, literature. Replies are 2-3 sentences, formal register (Sie). Always correct mistakes with explanation. Respond ONLY with JSON: {"reply": "<German text>", "correction": "<correction note or empty string>"}`,
+    system: (level) => `You are Professor Weber, a formal and precise German professor. The learner is Hungarian, CEFR level ${level || "A2"}. Discuss culture, history, literature in German (formal Sie). Always correct mistakes with explanation written in HUNGARIAN. Respond ONLY with JSON: {"reply": "<German text>", "correction": "<magyar nyelvű javítás magyarázattal, vagy üres string>"}`,
   },
   marco: {
     name: "Marco",
-    system: (level) => `You are Marco, an Italian expat living in Berlin, funny and expressive, CEFR level ${level || "A2"} learner's chat buddy. You occasionally slip in Italian words (ciao, mamma mia, etc.) and compare Germany with Italy humorously. Very warm and enthusiastic. Correct mistakes gently and briefly. Respond ONLY with JSON: {"reply": "<German text with occasional Italian flair>", "correction": "<correction or empty string>"}`,
+    system: (level) => `You are Marco, an Italian expat in Berlin, funny and expressive. The learner is Hungarian at CEFR ${level || "A2"}. Occasionally use Italian words (ciao, mamma mia). Correct mistakes gently in HUNGARIAN. Respond ONLY with JSON: {"reply": "<German text with Italian flair>", "correction": "<magyar nyelvű javítás, vagy üres string>"}`,
   },
   lena: {
     name: "Lena",
-    system: (level) => `You are Lena, a young Berlin professional (startup world). You text in business-casual German at CEFR level ${level || "A2"}, talk about work, coffee, city life, career. Efficient but friendly. Correct grammar mistakes briefly. Respond ONLY with JSON: {"reply": "<German text>", "correction": "<correction or empty string>"}`,
+    system: (level) => `You are Lena, a young Berlin startup professional. The learner is Hungarian at CEFR ${level || "A2"}. Text in business-casual German about work, coffee, city life. Correct mistakes briefly in HUNGARIAN. Respond ONLY with JSON: {"reply": "<German text>", "correction": "<magyar nyelvű javítás, vagy üres string>"}`,
   },
 };
 
@@ -150,7 +150,7 @@ app.post("/api/chat", async (req, res) => {
 app.post("/api/define", async (req, res) => {
   try {
     const { word, level } = req.body;
-    const system = `You are a German-English dictionary for a CEFR ${level || "A2"} learner. Given a German word, return its translation and a short note (gender for nouns, key conjugation for verbs). Respond ONLY with JSON: {"translation": "<short English translation>", "note": "<<=12 words, e.g. 'der Hund (m.) — dog', or empty string>"}`;
+    const system = `You are a German-Hungarian dictionary for a Hungarian learner at CEFR ${level || "A2"}. Given a German word, return its Hungarian translation and a short note in Hungarian (gender for nouns, key conjugation for verbs). Respond ONLY with JSON: {"translation": "<rövid magyar fordítás>", "note": "<<=12 szó, pl. 'der Hund (hím) — kutya' vagy üres string>"}`;
     res.json(await callJson({ system, messages: [{ role: "user", content: word }], maxTokens: 150 }));
   } catch (err) { console.error(err); res.status(500).json({ error: String(err) }); }
 });
@@ -227,14 +227,15 @@ app.delete("/api/vocab/:word", async (req, res) => {
 app.post("/api/grammar/lesson", async (req, res) => {
   try {
     const { topic, level } = req.body;
-    const system = `You are a concise German grammar teacher. Generate a short lesson for a CEFR ${level || "A2"} learner on: "${topic}".
+    const system = `You are a concise German grammar teacher for a Hungarian learner at CEFR ${level || "A2"}. Generate a short lesson on: "${topic}".
+Write the explanation and tip in HUNGARIAN. Examples are German sentences. Exercise can be Hungarian→German or fill-in-the-blank.
 Return ONLY a JSON object:
 {
-  "explanation": "<2-3 sentence explanation in English>",
-  "examples": ["<German sentence 1>", "<German sentence 2>", "<German sentence 3>"],
-  "tip": "<one memorable tip or mnemonic in English>",
-  "exercise": "<one fill-in-the-blank or translate exercise>",
-  "answer": "<correct answer>"
+  "explanation": "<2-3 mondatos magyarázat magyarul>",
+  "examples": ["<német mondat 1>", "<német mondat 2>", "<német mondat 3>"],
+  "tip": "<egy emlékezetes tipp vagy ökölszabály magyarul>",
+  "exercise": "<egy feladat — kitöltős vagy fordítás>",
+  "answer": "<helyes válasz>"
 }`;
     res.json(await callJson({ system, messages: [{ role: "user", content: topic }], maxTokens: 700 }));
   } catch (err) { res.status(500).json({ error: String(err) }); }

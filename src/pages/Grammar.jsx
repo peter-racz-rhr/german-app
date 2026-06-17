@@ -3,10 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { fetchGrammarLesson } from "../lib/api";
 
 const TOPICS = [
-  { level: "A1", color: "#34c759", items: ["Begrüßungen", "Zahlen 1–100", "Artikel (der/die/das)", "Ja/Nein Fragen"] },
-  { level: "A2", color: "#0a84ff", items: ["Präsens Konjugation", "Modalverben (können, müssen)", "Akkusativ", "Zeitausdrücke"] },
-  { level: "B1", color: "#ff9500", items: ["Perfekt", "Dativ", "Weil & Dass Sätze", "Trennbare Verben"] },
-  { level: "B2", color: "#ff3b30", items: ["Konjunktiv II", "Passiv", "Genitiv", "Idiomatische Ausdrücke"] },
+  { level: "A1", color: "#34c759", items: ["Köszönések és bemutatkozás", "Számok 1–100", "Névelők (der/die/das)", "Igen/Nem kérdések"] },
+  { level: "A2", color: "#0a84ff", items: ["Jelen idő ragozása", "Módbeli segédigék (können, müssen)", "Tárgyeset (Akkusativ)", "Időkifejezések"] },
+  { level: "B1", color: "#ff9500", items: ["Múlt idő (Perfekt)", "Részeshatározó (Dativ)", "Mert és hogy mellékmondatok", "Elváló igekötők"] },
+  { level: "B2", color: "#ff3b30", items: ["Feltételes mód (Konjunktiv II)", "Szenvedő szerkezet (Passiv)", "Birtokos eset (Genitiv)", "Idiómák és szólások"] },
 ];
 
 export default function Grammar({ profile }) {
@@ -33,8 +33,8 @@ export default function Grammar({ profile }) {
   return (
     <div className="flex flex-col h-full">
       <div className="px-4 pt-[max(14px,env(safe-area-inset-top))] pb-3 border-b border-[var(--line)]">
-        <p className="text-[28px] font-bold tracking-tight">Grammatik</p>
-        <p className="text-[13px] text-[var(--ink-faint)]">Wähle ein Thema</p>
+        <p className="text-[28px] font-bold tracking-tight">Nyelvtan</p>
+        <p className="text-[13px] text-[var(--ink-faint)]">Válassz egy témát</p>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-5">
@@ -99,20 +99,20 @@ export default function Grammar({ profile }) {
               <div className="flex-1 overflow-y-auto px-5 pb-8">
                 {loading && (
                   <div className="flex items-center justify-center py-12">
-                    <p className="text-[14px] text-[var(--ink-faint)]">KI generiert Lektion…</p>
+                    <p className="text-[14px] text-[var(--ink-faint)]">AI generálja a leckét…</p>
                   </div>
                 )}
 
                 {lesson && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
                     <div className="bg-[var(--accent-soft)] rounded-[14px] p-4">
-                      <p className="text-[13px] font-semibold text-[var(--accent)] mb-1">Erklärung</p>
+                      <p className="text-[13px] font-semibold text-[var(--accent)] mb-1">Magyarázat</p>
                       <p className="text-[14px] leading-relaxed">{lesson.explanation}</p>
                     </div>
 
                     {lesson.examples?.length > 0 && (
                       <div>
-                        <p className="text-[13px] font-semibold text-[var(--ink-soft)] mb-2">Beispiele</p>
+                        <p className="text-[13px] font-semibold text-[var(--ink-soft)] mb-2">Példák</p>
                         <div className="flex flex-col gap-2">
                           {lesson.examples.map((ex, i) => (
                             <div key={i} className="bg-[var(--surface)] rounded-[12px] px-4 py-2.5">
@@ -126,20 +126,21 @@ export default function Grammar({ profile }) {
                     {lesson.tip && (
                       <div className="border border-[#ffcc00] bg-[#fffbe6] rounded-[14px] p-4">
                         <p className="text-[13px] font-semibold text-[#7a6000] mb-1">💡 Tipp</p>
+
                         <p className="text-[13px]">{lesson.tip}</p>
                       </div>
                     )}
 
                     {lesson.exercise && (
                       <div className="border border-[var(--line)] rounded-[14px] p-4">
-                        <p className="text-[13px] font-semibold text-[var(--ink-soft)] mb-2">Übung</p>
+                        <p className="text-[13px] font-semibold text-[var(--ink-soft)] mb-2">Feladat</p>
                         <p className="text-[14px] mb-3">{lesson.exercise}</p>
                         {!showAnswer ? (
                           <button
                             onClick={() => setShowAnswer(true)}
                             className="text-[var(--accent)] text-[14px] font-medium"
                           >
-                            Antwort zeigen
+                            Mutasd a választ
                           </button>
                         ) : (
                           <motion.div

@@ -21,9 +21,9 @@ export default function Vocab() {
   return (
     <div className="flex flex-col h-full">
       <div className="px-4 pt-[max(14px,env(safe-area-inset-top))] pb-3 border-b border-[var(--line)]">
-        <p className="text-[28px] font-bold tracking-tight">Vokabeln</p>
+        <p className="text-[28px] font-bold tracking-tight">Szótár</p>
         <p className="text-[13px] text-[var(--ink-faint)]">
-          {words.length} {words.length === 1 ? "Wort" : "Wörter"} gespeichert
+          {words.length} {words.length === 1 ? "szó" : "szó"} elmentve
         </p>
       </div>
 
@@ -37,9 +37,9 @@ export default function Vocab() {
         {!loading && words.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full gap-3 px-8 text-center">
             <div className="text-[48px]">📖</div>
-            <p className="text-[16px] font-medium">Noch keine Wörter</p>
+            <p className="text-[16px] font-medium">Még nincs elmentett szó</p>
             <p className="text-[14px] text-[var(--ink-faint)]">
-              Tippe in der Chat-Seite auf ein Wort, um es hier zu speichern.
+              A chat oldalon koppints egy szóra, majd mentsd el ide.
             </p>
           </div>
         )}
