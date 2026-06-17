@@ -23,24 +23,26 @@ export default function Chat({ profile }) {
   const [savedWord, setSavedWord] = useState(null);
   const scrollRef = useRef(null);
   const textareaRef = useRef(null);
+  const initialScrollDone = useRef(false);
 
   useEffect(() => {
-    // 1. show cached instantly
+    initialScrollDone.current = false;
     const cacheKey = `msgs:${contact.id}`;
+    // 1. show cached instantly, scroll to bottom immediately
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
         if (parsed?.length) {
           setMessages(parsed);
-          // scroll immediately after paint
-          requestAnimationFrame(() =>
-            scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight })
-          );
+          requestAnimationFrame(() => {
+            scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+            initialScrollDone.current = true;
+          });
         }
       } catch {}
     }
-    // 2. fetch fresh from server in background
+    // 2. fetch fresh silently — no second scroll
     setLoaded(false);
     fetchMessages(contact.id)
       .then((saved) => {
@@ -58,7 +60,13 @@ export default function Chat({ profile }) {
     const cacheKey = `msgs:${contact.id}`;
     localStorage.setItem(cacheKey, JSON.stringify(messages));
     persistMessages(contact.id, messages).catch(() => {});
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    // only smooth-scroll for new messages, not on initial load
+    if (initialScrollDone.current) {
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    } else {
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+      initialScrollDone.current = true;
+    }
   }, [messages, loaded]);
 
   useEffect(() => {
