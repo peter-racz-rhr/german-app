@@ -241,4 +241,33 @@ Return ONLY a JSON object:
   } catch (err) { res.status(500).json({ error: String(err) }); }
 });
 
+// ── Daily story ───────────────────────────────────────────────────────────────
+
+app.get("/api/story/:contactId", async (req, res) => {
+  try {
+    const { contactId } = req.params;
+    const today = new Date().toISOString().split("T")[0];
+    const key = `story:${contactId}:${today}`;
+
+    const cached = await store(key, null);
+    if (cached) return res.json(cached);
+
+    const persona = PERSONAS[contactId] || PERSONAS.anna;
+    const system = `You are ${persona.name}. Send a short, casual German message to your Hungarian friend — something spontaneous you'd actually text: a thought, something you saw, plans, a question about their day. 1-2 sentences max in German.
+
+Return ONLY JSON:
+{
+  "text": "<your German message>",
+  "hint": "<1 sentence in Hungarian explaining what it's about, e.g. 'Anna arról kérdez, hogy...'>"
+}`;
+
+    const result = await callJson({ system, messages: [{ role: "user", content: "generate" }], maxTokens: 200 });
+    await persist(key, result);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: String(err) });
+  }
+});
+
 app.listen(PORT, () => console.log(`API listening on http://localhost:${PORT}`));

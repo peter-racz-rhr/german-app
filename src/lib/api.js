@@ -39,3 +39,5 @@ export const saveVocabWord = (entry) => post("/vocab", entry);
 export const deleteVocabWord = (word) => del(`/vocab/${encodeURIComponent(word)}`);
 
 export const fetchGrammarLesson = ({ topic, level }) => post("/grammar/lesson", { topic, level });
+
+export const fetchStory = (contactId) => get(`/story/${contactId}`);
