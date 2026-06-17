@@ -54,13 +54,17 @@ export default function Chat({ profile }) {
       .catch(() => setLoaded(true));
   }, [contact.id]);
 
-  // after messages render: snap to bottom instantly, then reveal
+  // after messages render: double-RAF ensures layout is fully calculated, then snap + reveal
   useEffect(() => {
     if (visible) return;
     if (messages.length === 0) return;
     requestAnimationFrame(() => {
-      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
-      setVisible(true);
+      requestAnimationFrame(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+        setVisible(true);
+      });
     });
   }, [messages]);
 
@@ -181,7 +185,7 @@ export default function Chat({ profile }) {
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-2 flex flex-col gap-1 bg-white transition-opacity duration-150" style={{ opacity: visible ? 1 : 0 }}>
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-2 flex flex-col gap-1 bg-white transition-opacity duration-150" style={{ opacity: visible ? 1 : 0, overscrollBehavior: "contain" }}>
         {/* Contact info at top of thread */}
         <div className="flex flex-col items-center py-4 gap-2">
           <Avatar contact={contact} size={70} />
