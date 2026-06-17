@@ -14,6 +14,21 @@ export default function App() {
   const [profile, setProfile] = useState(undefined);
 
   useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => {
+      document.documentElement.style.setProperty("--app-height", `${vv.height}px`);
+    };
+    update();
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+    };
+  }, []);
+
+  useEffect(() => {
     fetchProfile().then(setProfile).catch(() => setProfile(null));
   }, []);
 
@@ -34,7 +49,7 @@ export default function App() {
   }
 
   return (
-    <div className="h-[100dvh] flex flex-col bg-white overflow-hidden">
+    <div className="flex flex-col bg-white overflow-hidden" style={{ height: "var(--app-height, 100dvh)" }}>
       <div className="flex-1 overflow-hidden relative">
         <Routes>
           <Route path="/onboarding" element={<Onboarding onComplete={setProfile} />} />

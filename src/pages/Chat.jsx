@@ -161,14 +161,21 @@ export default function Chat({ profile }) {
       </div>
 
       {/* Input */}
-      <div className="flex items-center gap-2 px-3 py-2.5 pb-[max(12px,env(safe-area-inset-bottom))] border-t border-[var(--line)]">
-        <input
+      <div className="flex items-end gap-2 px-3 py-2.5 pb-[max(12px,env(safe-area-inset-bottom))] border-t border-[var(--line)]">
+        <textarea
           value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onFocus={() => setTimeout(() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }), 320)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder="iMessage"
-          className="flex-1 bg-[var(--surface)] rounded-full px-4 py-2.5 text-[15px] outline-none"
+          rows={1}
+          onChange={(e) => {
+            setInput(e.target.value);
+            e.target.style.height = "auto";
+            e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
+          }}
+          placeholder="Írj üzenetet…"
+          className="flex-1 bg-[var(--surface)] rounded-[20px] px-4 py-2.5 text-[15px] outline-none resize-none overflow-hidden leading-[1.4]"
+          style={{ minHeight: "40px", maxHeight: "120px" }}
           disabled={busy}
         />
         <motion.button
