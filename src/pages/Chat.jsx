@@ -6,8 +6,9 @@ import TypingDots from "../components/TypingDots";
 import WordPopover from "../components/WordPopover";
 import Avatar from "../components/Avatar";
 import { defineWord, fetchMessages, persistMessages, saveVocabWord, sendChatMessage } from "../lib/api";
-import { recordActivity, recordMsg, recordWordSave } from "../lib/stats";
+import { recordActivity, recordMsg, recordWordSave, XP_REWARDS } from "../lib/stats";
 import { CONTACTS } from "../lib/contacts";
+import XpToast from "../components/XpToast";
 
 export default function Chat({ profile }) {
   const { contactId } = useParams();
@@ -23,9 +24,15 @@ export default function Chat({ profile }) {
   const [busy, setBusy] = useState(false);
   const [popover, setPopover] = useState(null);
   const [savedWord, setSavedWord] = useState(null);
+  const [xpToast, setXpToast] = useState({ visible: false, amount: 0 });
   const scrollRef = useRef(null);
   const textareaRef = useRef(null);
   const msgCountRef = useRef(0);
+
+  function showXp(amount) {
+    setXpToast({ visible: true, amount });
+    setTimeout(() => setXpToast((t) => ({ ...t, visible: false })), 1200);
+  }
 
   useEffect(() => {
     msgCountRef.current = 0;
@@ -112,6 +119,7 @@ export default function Chat({ profile }) {
     if (textareaRef.current) textareaRef.current.style.height = "40px";
     recordActivity();
     recordMsg();
+    showXp(XP_REWARDS.msg);
     setBusy(true);
     try {
       const apiMessages = next.map((m) => ({
@@ -141,6 +149,7 @@ export default function Chat({ profile }) {
     if (!popover?.info) return;
     await saveVocabWord({ word: popover.word, translation: popover.info.translation, note: popover.info.note }).catch(() => {});
     recordWordSave();
+    showXp(XP_REWARDS.word);
     setSavedWord(popover.word);
     setTimeout(() => setSavedWord(null), 2000);
     setPopover(null);
@@ -308,6 +317,8 @@ export default function Chat({ profile }) {
           </div>
         </div>
       </div>
+
+      <XpToast amount={xpToast.amount} visible={xpToast.visible} />
 
       {/* Saved word toast */}
       <AnimatePresence>
