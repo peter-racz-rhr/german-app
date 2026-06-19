@@ -4,12 +4,29 @@ import { motion, AnimatePresence } from "framer-motion";
 import Avatar from "../components/Avatar";
 import { CONTACTS } from "../lib/contacts";
 import { fetchStory } from "../lib/api";
+import { getStreak, getMsgCount, getVocabCount, recordActivity } from "../lib/stats";
+
+function StatChip({ icon, value, label, accent }) {
+  return (
+    <div className="flex-1 flex flex-col items-center bg-[#f2f2f7] rounded-[12px] py-2 px-1 gap-0.5">
+      <span className="text-[18px] leading-none">{icon}</span>
+      <span className="text-[16px] font-semibold leading-tight" style={{ color: accent }}>{value}</span>
+      <span className="text-[10px] text-[#8e8e93] leading-tight text-center">{label}</span>
+    </div>
+  );
+}
 
 export default function ContactList() {
   const navigate = useNavigate();
   const [stories, setStories] = useState({});
   const [activeStory, setActiveStory] = useState(null);
   const [loadingStory, setLoadingStory] = useState(null);
+  const [stats, setStats] = useState({ streak: 0, msgs: 0, vocab: 0 });
+
+  useEffect(() => {
+    recordActivity();
+    setStats({ streak: getStreak(), msgs: getMsgCount(), vocab: getVocabCount() });
+  }, []);
 
   useEffect(() => {
     // check which contacts have a cached story today
@@ -66,6 +83,18 @@ export default function ContactList() {
             <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" strokeLinecap="round"/>
           </svg>
           <span className="text-[15px] text-[#8e8e93]">Keresés</span>
+        </div>
+
+        {/* Stats strip */}
+        <div className="flex gap-2 mb-3">
+          <StatChip
+            icon="🔥"
+            value={stats.streak}
+            label={stats.streak === 1 ? "napos streak" : "napos streak"}
+            accent={stats.streak > 0 ? "#ff6b35" : "#8e8e93"}
+          />
+          <StatChip icon="💬" value={stats.msgs} label="üzenet" accent="#0a84ff" />
+          <StatChip icon="📖" value={stats.vocab} label="szó mentve" accent="#5856d6" />
         </div>
       </div>
 

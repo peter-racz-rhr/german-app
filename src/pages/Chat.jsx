@@ -6,6 +6,7 @@ import TypingDots from "../components/TypingDots";
 import WordPopover from "../components/WordPopover";
 import Avatar from "../components/Avatar";
 import { defineWord, fetchMessages, persistMessages, saveVocabWord, sendChatMessage } from "../lib/api";
+import { recordActivity, recordMsg } from "../lib/stats";
 import { CONTACTS } from "../lib/contacts";
 
 export default function Chat({ profile }) {
@@ -109,6 +110,8 @@ export default function Chat({ profile }) {
     setMessages(next);
     setInput("");
     if (textareaRef.current) textareaRef.current.style.height = "40px";
+    recordActivity();
+    recordMsg();
     setBusy(true);
     try {
       const apiMessages = next.map((m) => ({

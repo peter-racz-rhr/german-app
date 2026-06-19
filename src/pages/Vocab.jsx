@@ -67,8 +67,14 @@ export default function Vocab({ profile }) {
   const searchTimeout = useRef(null);
 
   useEffect(() => {
+    const cached = localStorage.getItem("vocab_cache");
+    if (cached) try { setWords(JSON.parse(cached)); } catch {}
     fetchVocab()
-      .then((v) => setWords(v || []))
+      .then((v) => {
+        const list = v || [];
+        setWords(list);
+        localStorage.setItem("vocab_cache", JSON.stringify(list));
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
