@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Avatar from "../components/Avatar";
 import { CONTACTS } from "../lib/contacts";
 import { fetchStory } from "../lib/api";
-import { getStreak, getMsgCount, getVocabCount, recordActivity } from "../lib/stats";
+import { getStreak, getMsgCount, getVocabCount, recordActivity, getLevelInfo } from "../lib/stats";
 
 function StatChip({ icon, value, label, accent }) {
   return (
@@ -22,10 +22,12 @@ export default function ContactList() {
   const [activeStory, setActiveStory] = useState(null);
   const [loadingStory, setLoadingStory] = useState(null);
   const [stats, setStats] = useState({ streak: 0, msgs: 0, vocab: 0 });
+  const [lvl, setLvl] = useState({ label: "A1", pct: 0, xp: 0, nextMin: 100 });
 
   useEffect(() => {
     recordActivity();
     setStats({ streak: getStreak(), msgs: getMsgCount(), vocab: getVocabCount() });
+    setLvl(getLevelInfo());
   }, []);
 
   useEffect(() => {
@@ -90,11 +92,28 @@ export default function ContactList() {
           <StatChip
             icon="🔥"
             value={stats.streak}
-            label={stats.streak === 1 ? "napos streak" : "napos streak"}
+            label="napos streak"
             accent={stats.streak > 0 ? "#ff6b35" : "#8e8e93"}
           />
           <StatChip icon="💬" value={stats.msgs} label="üzenet" accent="#0a84ff" />
           <StatChip icon="📖" value={stats.vocab} label="szó mentve" accent="#5856d6" />
+        </div>
+
+        {/* XP level bar */}
+        <div className="mb-3 bg-[#f2f2f7] rounded-[12px] px-3 py-2">
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[12px] font-bold text-[var(--accent)]">{lvl.label}</span>
+              <span className="text-[11px] text-[#8e8e93]">szint</span>
+            </div>
+            <span className="text-[11px] text-[#8e8e93]">{lvl.xp} XP{lvl.nextMin ? ` · ${lvl.nextMin - lvl.xp} a következőig` : " · Max!"}</span>
+          </div>
+          <div className="h-1.5 bg-[#e5e5ea] rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${lvl.pct}%`, background: "linear-gradient(90deg, #0a84ff, #5856d6)" }}
+            />
+          </div>
         </div>
       </div>
 

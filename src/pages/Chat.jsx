@@ -6,7 +6,7 @@ import TypingDots from "../components/TypingDots";
 import WordPopover from "../components/WordPopover";
 import Avatar from "../components/Avatar";
 import { defineWord, fetchMessages, persistMessages, saveVocabWord, sendChatMessage } from "../lib/api";
-import { recordActivity, recordMsg } from "../lib/stats";
+import { recordActivity, recordMsg, recordWordSave } from "../lib/stats";
 import { CONTACTS } from "../lib/contacts";
 
 export default function Chat({ profile }) {
@@ -140,6 +140,7 @@ export default function Chat({ profile }) {
   async function handleSaveWord() {
     if (!popover?.info) return;
     await saveVocabWord({ word: popover.word, translation: popover.info.translation, note: popover.info.note }).catch(() => {});
+    recordWordSave();
     setSavedWord(popover.word);
     setTimeout(() => setSavedWord(null), 2000);
     setPopover(null);

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { fetchGrammarLesson } from "../lib/api";
+import { recordLesson } from "../lib/stats";
 
 const TOPICS = [
   { level: "A1", color: "#34c759", items: ["Köszönések és bemutatkozás", "Számok 1–100", "Névelők (der/die/das)", "Igen/Nem kérdések"] },
@@ -23,6 +24,7 @@ export default function Grammar({ profile }) {
     try {
       const data = await fetchGrammarLesson({ topic, level: profile?.level });
       setLesson(data);
+      recordLesson();
     } catch {
       setLesson({ explanation: "Fehler beim Laden. Bitte nochmal versuchen.", examples: [], tip: "", exercise: "", answer: "" });
     } finally {

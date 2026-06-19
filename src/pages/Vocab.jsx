@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { fetchVocab, deleteVocabWord, lookupWord, saveVocabWord } from "../lib/api";
+import { recordWordSave } from "../lib/stats";
 
 // SRS intervals in ms: first review after 1 day, then 3d, 7d, 14d, 30d
 const SRS_INTERVALS = [86400000, 259200000, 604800000, 1209600000, 2592000000];
@@ -285,6 +286,7 @@ export default function Vocab({ profile }) {
     if (!dictResult || !query) return;
     const note = dictResult.article !== "—" ? `${dictResult.article} · ${dictResult.plural}` : dictResult.forms;
     await saveVocabWord({ word: query, translation: dictResult.translation, note }).catch(() => {});
+    recordWordSave();
     const newEntry = { word: query, translation: dictResult.translation, note, addedAt: Date.now() };
     setWords((w) => [newEntry, ...w.filter(x => x.word !== query)]);
     setSavedFromDict(true);
